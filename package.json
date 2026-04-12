@@ -1,0 +1,28 @@
+{
+  "name": "crypto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Krepto-vlad/Crypto.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Krepto-vlad/Crypto/issues"
+  },
+  "homepage": "https://github.com/Krepto-vlad/Crypto#readme",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-keystore": "^3.0.5",
+    "@nomicfoundation/hardhat-toolbox-viem": "^5.0.3",
+    "@types/node": "^22.19.17",
+    "hardhat": "^3.3.0",
+    "typescript": "~5.8.0"
+  }
+}
