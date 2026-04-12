@@ -1,7 +1,23 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { network } from "hardhat";
-import { parseEther } from "viem";
+import { parseEther, BaseError, ContractFunctionRevertedError, ContractFunctionExecutionError } from "viem";
+
+function assertContractRevert(error: unknown, expectedErrorName: string) {
+  assert.ok(error instanceof BaseError, "Expected a BaseError from viem");
+  const revertError = error.walk(
+    (e) => e instanceof ContractFunctionRevertedError
+  ) as ContractFunctionRevertedError | null;
+  if (revertError?.data?.errorName) {
+    assert.equal(revertError.data.errorName, expectedErrorName);
+  } else {
+    // Fallback: check the error message contains the custom error name
+    assert.ok(
+      error.message.includes(expectedErrorName),
+      `Expected error to contain "${expectedErrorName}", got: ${error.message}`
+    );
+  }
+}
 
 describe("MyToken", function () {
   async function deployToken() {
@@ -53,14 +69,15 @@ describe("MyToken", function () {
       const { myToken, otherClient } = await deployToken();
       const mintAmount = parseEther("500");
 
-      try {
-        await myToken.write.mint([otherClient.account.address, mintAmount], {
+      await assert.rejects(
+        () => myToken.write.mint([otherClient.account.address, mintAmount], {
           account: otherClient.account,
-        });
-        assert.fail("Should have reverted");
-      } catch (error: any) {
-        assert.ok(error.message.includes("OwnableUnauthorizedAccount"));
-      }
+        }),
+        (error: unknown) => {
+          assertContractRevert(error, "OwnableUnauthorizedAccount");
+          return true;
+        }
+      );
     });
   });
 
@@ -82,12 +99,13 @@ describe("MyToken", function () {
       const { myToken, walletClient, otherClient } = await deployToken();
       const tooMuch = parseEther("1000001"); // more than initial supply
 
-      try {
-        await myToken.write.transfer([otherClient.account.address, tooMuch]);
-        assert.fail("Should have reverted");
-      } catch (error: any) {
-        assert.ok(error.message.includes("ERC20InsufficientBalance"));
-      }
+      await assert.rejects(
+        () => myToken.write.transfer([otherClient.account.address, tooMuch]),
+        (error: unknown) => {
+          assertContractRevert(error, "ERC20InsufficientBalance");
+          return true;
+        }
+      );
     });
 
     it("Should update balances after multiple transfers", async function () {
