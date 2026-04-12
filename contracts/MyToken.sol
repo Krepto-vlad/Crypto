@@ -10,7 +10,7 @@ contract MyToken is ERC20, Ownable {
     }
 
     /// @notice Mint new tokens. Only the contract owner can call this.
-    function mint(address to, uint256 amount) public onlyOwner {
+    function mint(address to, uint256 amount) external onlyOwner {
         _mint(to, amount);
     }
 }
