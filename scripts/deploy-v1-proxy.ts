@@ -36,8 +36,6 @@ try {
   proxyBytecode = artifact.bytecode as `0x${string}`;
   proxyAbi = artifact.abi;
 } catch {
-  // If build artifacts don't exist, use the compiled bytecode from Hardhat build-info
-  // Fallback: deploy using walletClient directly
   throw new Error(
     "ERC1967Proxy artifact not found. Ensure @openzeppelin/contracts is installed."
   );

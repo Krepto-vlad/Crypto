@@ -7,6 +7,12 @@ const preState = JSON.parse(readFileSync("pre-upgrade-state.json", "utf-8"));
 const { viem, networkName } = await network.connect();
 const [walletClient] = await viem.getWalletClients();
 
+if (addresses.network !== networkName) {
+  throw new Error(
+    `Network mismatch: deployed-addresses.json was created for "${addresses.network}", but the current network is "${networkName}".`
+  );
+}
+
 console.log(`Validating upgrade on ${networkName}...`);
 console.log(`Proxy address: ${addresses.proxy}\n`);
 

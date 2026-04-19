@@ -6,8 +6,15 @@ const { viem, networkName } = await network.connect();
 const [walletClient] = await viem.getWalletClients();
 const publicClient = await viem.getPublicClient();
 
+if (addresses.network !== networkName) {
+  throw new Error(
+    `Network mismatch: deployed-addresses.json was created for "${addresses.network}", but the current network is "${networkName}".`
+  );
+}
+
 console.log(`Upgrading proxy to MyTokenV2 on ${networkName}...`);
-console.log(`Proxy address: ${addresses.proxy}\n`);
+console.log(`Proxy address: ${addresses.proxy}`);
+console.log(`Upgrader: ${walletClient.account.address}\n`);
 
 // 1. Deploy V2 implementation
 console.log("Step 1: Deploying MyTokenV2 implementation...");

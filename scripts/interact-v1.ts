@@ -1,6 +1,6 @@
 import { network } from "hardhat";
 import { parseEther, formatEther } from "viem";
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 
 const addresses = JSON.parse(readFileSync("deployed-addresses.json", "utf-8"));
 const { viem, networkName } = await network.connect();
@@ -13,10 +13,13 @@ console.log(`Interacting with MyTokenV1 via Proxy on ${networkName}`);
 console.log(`Proxy address: ${addresses.proxy}`);
 console.log(`Deployer: ${walletClient.account.address}`);
 
-// Check if we have a second account
+// Use second account if available, otherwise self-transfer (single-key testnets)
 const secondAddress = secondClient
   ? secondClient.account.address
   : walletClient.account.address;
+if (!secondClient) {
+  console.log(`(!) Only one wallet configured — transfer will be a self-transfer`);
+}
 console.log(`Second account: ${secondAddress}\n`);
 
 // 1. Show initial balances
@@ -50,11 +53,12 @@ console.log(`  Total Supply: ${formatEther(totalSupply)} MTK`);
 
 // Save balances for validation after upgrade
 const state = {
+  deployerAddress: walletClient.account.address,
   deployerBalance: deployerFinal.toString(),
   secondBalance: secondFinal.toString(),
   secondAddress,
   totalSupply: totalSupply.toString(),
+  network: networkName,
 };
-const fs = await import("fs");
-fs.writeFileSync("pre-upgrade-state.json", JSON.stringify(state, null, 2));
+writeFileSync("pre-upgrade-state.json", JSON.stringify(state, null, 2));
 console.log("\nPre-upgrade state saved to pre-upgrade-state.json");
