@@ -147,7 +147,7 @@ contract MultiSigWallet {
      * @notice Submit a new transaction proposal.
      * @param _to    Recipient of the call / Ether transfer.
      * @param _value Amount of Ether to send (in wei).
-     * @param _data  Encoded call data; pass `""` for plain ETH transfers.
+     * @param _data  Encoded call data; pass `0x` for plain ETH transfers.
      * @return txIndex Index of the newly created transaction.
      */
     function submitTransaction(
