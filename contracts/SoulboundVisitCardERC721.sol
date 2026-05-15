@@ -29,9 +29,9 @@ contract SoulboundVisitCardERC721 is ERC721, Ownable {
     // tokenId => student metadata
     mapping(uint256 => StudentCard) private _cards;
 
-    // student wallet => tokenId (each student can hold at most one card)
+    // student wallet => tokenId (each student can hold at most one card).
+    // A value of 0 means "no card minted", so minted token IDs must start at 1.
     mapping(address => uint256) private _studentToken;
-    mapping(address => bool) private _hasMinted;
 
     uint256 private _nextTokenId;
 
