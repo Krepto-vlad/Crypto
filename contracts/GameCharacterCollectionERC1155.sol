@@ -108,6 +108,9 @@ contract GameCharacterCollectionERC1155 is ERC1155, Ownable {
         uint256[] calldata ids,
         uint256[] calldata amounts
     ) external onlyOwner {
+        for (uint256 i = 0; i < ids.length; i++) {
+            require(ids[i] >= 1 && ids[i] <= TOTAL_CHARACTERS, "Invalid character ID");
+        }
         _mintBatch(to, ids, amounts, "");
         emit CharactersMinted(to, ids, amounts);
     }

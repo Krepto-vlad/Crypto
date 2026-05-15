@@ -41,6 +41,7 @@ contract SoulboundVisitCardERC721 is ERC721, Ownable {
 
     error Soulbound();
     error AlreadyMinted(address student);
+    error NoCardMinted(address student);
 
     // -------------------------------------------------------------------------
     // Events
@@ -106,6 +107,11 @@ contract SoulboundVisitCardERC721 is ERC721, Ownable {
         _requireOwned(tokenId);
         StudentCard memory card = _cards[tokenId];
 
+        string memory escapedName = _escapeJson(card.studentName);
+        string memory escapedStudentID = _escapeJson(card.studentID);
+        string memory escapedCourse = _escapeJson(card.course);
+        string memory escapedYear = _escapeJson(card.year);
+
         string memory svg = _buildSVG(card, tokenId);
         string memory imageURI = string(
             abi.encodePacked(
@@ -116,14 +122,14 @@ contract SoulboundVisitCardERC721 is ERC721, Ownable {
 
         string memory json = string(
             abi.encodePacked(
-                '{"name":"Visit Card #', tokenId.toString(), ' - ', card.studentName, '",',
+                '{"name":"Visit Card #', tokenId.toString(), ' - ', escapedName, '",',
                 '"description":"Soulbound student visit card NFT. Non-transferable.",',
                 '"image":"', imageURI, '",',
                 '"attributes":[',
-                    '{"trait_type":"Student Name","value":"', card.studentName, '"},',
-                    '{"trait_type":"Student ID","value":"', card.studentID, '"},',
-                    '{"trait_type":"Course","value":"', card.course, '"},',
-                    '{"trait_type":"Year","value":"', card.year, '"},',
+                    '{"trait_type":"Student Name","value":"', escapedName, '"},',
+                    '{"trait_type":"Student ID","value":"', escapedStudentID, '"},',
+                    '{"trait_type":"Course","value":"', escapedCourse, '"},',
+                    '{"trait_type":"Year","value":"', escapedYear, '"},',
                     '{"trait_type":"Soulbound","value":"true"}',
                 ']}'
             )
@@ -138,6 +144,11 @@ contract SoulboundVisitCardERC721 is ERC721, Ownable {
     }
 
     function _buildSVG(StudentCard memory card, uint256 tokenId) internal pure returns (string memory) {
+        string memory nameXml = _escapeXml(card.studentName);
+        string memory studentIdXml = _escapeXml(card.studentID);
+        string memory courseXml = _escapeXml(card.course);
+        string memory yearXml = _escapeXml(card.year);
+
         return string(
             abi.encodePacked(
                 '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250">',
@@ -149,14 +160,14 @@ contract SoulboundVisitCardERC721 is ERC721, Ownable {
                 '<circle cx="48" cy="48" r="28" fill="#0f3460"/>',
                 '<text x="48" y="55" text-anchor="middle" font-size="22" fill="#e94560" font-family="monospace" font-weight="bold">ID</text>',
                 '<text x="90" y="36" font-size="11" fill="#8892b0" font-family="monospace">STUDENT VISIT CARD</text>',
-                '<text x="90" y="55" font-size="17" fill="#ccd6f6" font-family="monospace" font-weight="bold">', card.studentName, '</text>',
+                '<text x="90" y="55" font-size="17" fill="#ccd6f6" font-family="monospace" font-weight="bold">', nameXml, '</text>',
                 '<line x1="24" y1="80" x2="376" y2="80" stroke="#0f3460" stroke-width="1"/>',
                 '<text x="24" y="106" font-size="11" fill="#8892b0" font-family="monospace">STUDENT ID</text>',
-                '<text x="24" y="124" font-size="14" fill="#e94560" font-family="monospace" font-weight="bold">', card.studentID, '</text>',
+                '<text x="24" y="124" font-size="14" fill="#e94560" font-family="monospace" font-weight="bold">', studentIdXml, '</text>',
                 '<text x="220" y="106" font-size="11" fill="#8892b0" font-family="monospace">COURSE</text>',
-                '<text x="220" y="124" font-size="13" fill="#ccd6f6" font-family="monospace">', card.course, '</text>',
+                '<text x="220" y="124" font-size="13" fill="#ccd6f6" font-family="monospace">', courseXml, '</text>',
                 '<text x="24" y="158" font-size="11" fill="#8892b0" font-family="monospace">YEAR</text>',
-                '<text x="24" y="176" font-size="14" fill="#ccd6f6" font-family="monospace">', card.year, '</text>',
+                '<text x="24" y="176" font-size="14" fill="#ccd6f6" font-family="monospace">', yearXml, '</text>',
                 '<text x="220" y="158" font-size="11" fill="#8892b0" font-family="monospace">TOKEN ID</text>',
                 '<text x="220" y="176" font-size="14" fill="#ccd6f6" font-family="monospace">#', tokenId.toString(), '</text>',
                 '<text x="24" y="224" font-size="10" fill="#e94560" font-family="monospace">&#128274; SOULBOUND - NON-TRANSFERABLE</text>',
@@ -175,8 +186,71 @@ contract SoulboundVisitCardERC721 is ERC721, Ownable {
     }
 
     function tokenOfStudent(address student) external view returns (uint256) {
-        require(_hasMinted[student], "No card minted for this student");
+        if (!_hasMinted[student]) revert NoCardMinted(student);
         return _studentToken[student];
+    }
+
+    function _escapeJson(string memory value) internal pure returns (string memory) {
+        bytes memory src = bytes(value);
+        bytes memory dst = new bytes(src.length * 2 + 8);
+        uint256 j = 0;
+
+        for (uint256 i = 0; i < src.length; i++) {
+            bytes1 c = src[i];
+            if (c == '"') {
+                dst[j++] = '\\';
+                dst[j++] = '"';
+            } else if (c == '\\') {
+                dst[j++] = '\\';
+                dst[j++] = '\\';
+            } else if (c == 0x0A) {
+                dst[j++] = '\\';
+                dst[j++] = 'n';
+            } else if (c == 0x0D) {
+                dst[j++] = '\\';
+                dst[j++] = 'r';
+            } else if (c == 0x09) {
+                dst[j++] = '\\';
+                dst[j++] = 't';
+            } else {
+                dst[j++] = c;
+            }
+        }
+
+        bytes memory out = new bytes(j);
+        for (uint256 i = 0; i < j; i++) {
+            out[i] = dst[i];
+        }
+        return string(out);
+    }
+
+    function _escapeXml(string memory value) internal pure returns (string memory) {
+        bytes memory src = bytes(value);
+        bytes memory dst = new bytes(src.length * 6 + 8);
+        uint256 j = 0;
+
+        for (uint256 i = 0; i < src.length; i++) {
+            bytes1 c = src[i];
+            if (c == '&') {
+                dst[j++] = '&'; dst[j++] = 'a'; dst[j++] = 'm'; dst[j++] = 'p'; dst[j++] = ';';
+            } else if (c == '<') {
+                dst[j++] = '&'; dst[j++] = 'l'; dst[j++] = 't'; dst[j++] = ';';
+            } else if (c == '>') {
+                dst[j++] = '&'; dst[j++] = 'g'; dst[j++] = 't'; dst[j++] = ';';
+            } else if (c == '"') {
+                dst[j++] = '&'; dst[j++] = 'q'; dst[j++] = 'u'; dst[j++] = 'o'; dst[j++] = 't'; dst[j++] = ';';
+            } else if (c == '\'') {
+                dst[j++] = '&'; dst[j++] = 'a'; dst[j++] = 'p'; dst[j++] = 'o'; dst[j++] = 's'; dst[j++] = ';';
+            } else {
+                dst[j++] = c;
+            }
+        }
+
+        bytes memory out = new bytes(j);
+        for (uint256 i = 0; i < j; i++) {
+            out[i] = dst[i];
+        }
+        return string(out);
     }
 
     // -------------------------------------------------------------------------
