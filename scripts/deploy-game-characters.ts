@@ -1,8 +1,12 @@
 import { network } from "hardhat";
 import { writeFileSync } from "fs";
+import { getAddress } from "viem";
 
 // ── Student wallet to receive 2 game character NFTs
-const STUDENT_WALLET = "0xf2f2c05e05a37c751231fb0c1b1a39e61f565a39";
+const DEFAULT_STUDENT_WALLET = "0xf2f2c05e05a37c751231fb0c1b1a39e61f565a39";
+const STUDENT_WALLET = getAddress(
+  process.argv[2] ?? process.env.STUDENT_WALLET ?? DEFAULT_STUDENT_WALLET
+);
 
 const { viem, networkName } = await network.connect();
 const [deployer] = await viem.getWalletClients();

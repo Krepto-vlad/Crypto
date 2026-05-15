@@ -1,7 +1,11 @@
 import { network } from "hardhat";
 import { readFileSync, writeFileSync } from "fs";
+import { getAddress } from "viem";
 
-const RECEIVER = "0xCE8aD564DaC2705B7612bad8Eb572596466eE116";
+const DEFAULT_RECEIVER = "0xCE8aD564DaC2705B7612bad8Eb572596466eE116";
+const RECEIVER = getAddress(
+  process.argv[2] ?? process.env.RECEIVER_WALLET ?? DEFAULT_RECEIVER
+);
 
 const deployment = JSON.parse(readFileSync("deployed-game-characters.json", "utf-8"));
 const { viem, networkName } = await network.connect();
