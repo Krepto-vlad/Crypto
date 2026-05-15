@@ -1,0 +1,8 @@
+{
+  "contract": "0x7d8a25ce9f8e6922241da626359c034d21c18919",
+  "network": "sepolia",
+  "batchMintTx": "0x2a7fc4461d10e2eaca94f691d1044d9b184919af96d3f0b8284ba6ef2c50b40b",
+  "batchTransferTx": "0x0f7a8fda3f09e10a7716cf071098639f07b56c9b35a17c8f7c3495c881d7b2e2",
+  "secondReceiver": "0xCE8aD564DaC2705B7612bad8Eb572596466eE116",
+  "finalBatchTransferTx": "0xe23c4f5000b5d855fe15bf029e5887996dcba2c727cabfcab56a927a9c1f040f"
+}

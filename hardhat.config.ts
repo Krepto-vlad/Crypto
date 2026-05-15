@@ -5,6 +5,10 @@ import HardhatKeystore from "@nomicfoundation/hardhat-keystore";
 export default defineConfig({
   solidity: {
     version: "0.8.28",
+    settings: {
+      optimizer: { enabled: true, runs: 200 },
+      viaIR: true,
+    },
   },
   plugins: [HardhatToolboxViem, HardhatKeystore],
   networks: {
