@@ -89,8 +89,8 @@ contract GameCharacterCollectionERC1155 is ERC1155, Ownable {
      */
     function batchMintAll(address to, uint256[10] calldata amounts) external onlyOwner {
         uint256[] memory ids = _allIds();
-        uint256[] memory amts = new uint256[](10);
-        for (uint256 i = 0; i < 10; i++) {
+        uint256[] memory amts = new uint256[](TOTAL_CHARACTERS);
+        for (uint256 i = 0; i < TOTAL_CHARACTERS; i++) {
             amts[i] = amounts[i];
         }
         _mintBatch(to, ids, amts, "");
