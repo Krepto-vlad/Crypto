@@ -150,7 +150,7 @@ Use screenshots to demonstrate:
 - ERC-1155 balances showing token IDs `#1` and `#2` on the second wallet
 
 Suggested folder:
-- `screenshots/Assigment 8/`
+- `screenshots/Assignment 8/`
 
 ## Notes
 
